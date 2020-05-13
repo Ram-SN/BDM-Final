@@ -36,8 +36,7 @@ def centerlineMatch(b, year, county, house_num1, house_num2, street):
                 else:
                 	if L_LOW_HN_2 and L_HIGH_HN_2 and L_LOW_HN_1 and R_HIGH_HN_1:
 
-                        if((house_num2 >= L_LOW_HN_2) and (house_num2 <= L_HIGH_HN_2) and (house_num1 >= L_LOW_HN_1) and (house_num1 <= R_HIGH_HN_1)
-                          and (BOROCODE == county) and ((ST_LABEL == street) | (FULL_STREE == street))):
+                        if((house_num2 >= L_LOW_HN_2) and (house_num2 <= L_HIGH_HN_2) and (house_num1 >= L_LOW_HN_1) and (house_num1 <= R_HIGH_HN_1) and (BOROCODE == county) and ((ST_LABEL == street) | (FULL_STREE == street))):
                             return(phys_id, year)
         else:
             if R_LOW_HN and R_HIGH_HN:
