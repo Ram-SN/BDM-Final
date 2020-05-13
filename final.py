@@ -45,10 +45,14 @@ def centerlineMatch(b, year, county, house_num1, house_num2, street):
                     if((house_num1 >= R_LOW_HN) and (house_num1 <= R_HIGH_HN) and (BOROCODE == county) and ((ST_LABEL == street) | (FULL_STREE == street))):
                         return(phys_id, year)
                 else:
-                	if L_LOW_HN and L_HIGH_HN:
+                    if L_LOW_HN and L_HIGH_HN:
                         if((house_num1 >= L_LOW_HN) and (house_num1 <= L_HIGH_HN) and (BOROCODE == county) and ((ST_LABEL == street) | (FULL_STREE == street))):
                             return(phys_id, year)
+    
     return(None, year)
+
+
+
 
 def processTrips(pid, records):
 
