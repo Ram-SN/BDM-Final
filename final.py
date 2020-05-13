@@ -160,3 +160,5 @@ if __name__=='__main__':
             .sortBy(lambda x: x[0], ascending=True)\
             .reduceByKey(lambda x,y: x+y) \
             .collect()
+
+    print(counts)
