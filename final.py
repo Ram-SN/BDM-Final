@@ -117,7 +117,7 @@ if __name__=='__main__':
 
     spark = SparkSession(sc)
 
-    centerline = spark.read.csv('Centerline.csv', header=True, escape ='"', inferSchema = True, multiLine = True).cache()
+    centerline = spark.read.csv('hdfs:///tmp/bdm/nyc_cscl.csv', header=True, escape ='"', inferSchema = True, multiLine = True).cache()
 
     centerline.createOrReplaceTempView('centerline')
 
@@ -155,7 +155,7 @@ if __name__=='__main__':
     
     b = sc.broadcast(centerline.collect())
 
-    rdd = sc.textFile('pv_sample.csv')
+    rdd = sc.textFile('hdfs:///tmp/bdm/nyc_parking_violation/')
     counts = rdd.mapPartitionsWithIndex(processTrips)\
             .sortBy(lambda x: x[0], ascending=True)\
             .reduceByKey(lambda x,y: x+y) \
