@@ -86,7 +86,7 @@ def processTrips(pid, records):
                         if street:
                             ## TODO Pass all these values to a function which matches on these and returns physical ID and year
                             if "-" in house:
-                                house_num1,house_num2 = abc.split('-')
+                                house_num1,house_num2 = house.split('-')
                             else:
                                 house_num1 = house
                                 house_num2 = None
