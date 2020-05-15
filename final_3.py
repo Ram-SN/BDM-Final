@@ -158,10 +158,10 @@ if __name__=='__main__':
     centerline.createOrReplaceTempView('centerline')
     
     violations = clean_violations(violations)
-#     violations.show()
+    violations.show()
     
     centerline = clean_centerline(centerline)
-#     centerline.show()
+    centerline.show()
     
     cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations, centerline)
     
@@ -170,11 +170,11 @@ if __name__=='__main__':
     cond3_violations.createOrReplaceTempView('cond3_violations')
     cond4_violations.createOrReplaceTempView('cond4_violations')
     result = unionAll(cond1_violations, cond2_violations, cond3_violations, cond4_violations)
-#     result.show()
+    result.show()
     
     result.createOrReplaceTempView('result')
     x_pivot = pivot_result(result)
-#     x_pivot.show()
+    x_pivot.show()
     
     x_pivot.createOrReplaceTempView('x_pivot')
     
