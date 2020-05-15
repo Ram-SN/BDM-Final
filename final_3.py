@@ -127,7 +127,7 @@ def pivot_result(result):
 def my_ols(a,b,c,d,e):
     
     y = ([a,b,c,d,e])
-    x = ([2015,2016,2017,2018,2019])
+    x = ([2011,2012,2013,2014,2015])
     x = sm.add_constant(x)
     model = sm.OLS(y,x)
     results = model.fit()
