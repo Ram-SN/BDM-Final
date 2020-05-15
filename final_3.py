@@ -178,7 +178,7 @@ if __name__=='__main__':
     
     x_pivot.createOrReplaceTempView('x_pivot')
     
-    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2015'],x_pivot['2016'],x_pivot['2017'],x_pivot['2018'],x_pivot['2019']))
+    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2011'],x_pivot['2012'],x_pivot['2013'],x_pivot['2014'],x_pivot['2015']))
 
     x_pivot = x_pivot.withColumn("OLS_COEFF", F.round("OLS_COEFF",2))
     
