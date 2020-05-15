@@ -114,7 +114,7 @@ def pivot_result(result):
     
     result.createOrReplaceTempView('result')
     x_pivot = result.groupBy('PHYSICALID')\
-        .pivot("Year",["2015","2016","2017","2018","2019"])\
+        .pivot("Year",["2011","2012","2013","2014","2015"])\
         .count()\
         .orderBy(['PHYSICALID'], ascending=True)
 
