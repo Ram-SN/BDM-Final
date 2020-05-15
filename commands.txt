@@ -6,3 +6,11 @@ module load spark/2.4.0
 module load python/gnu/3.6.5 gcc/5.3.0
 module load anaconda3/2019.10
 export PYSPARK_PYTHON=`which python`
+
+-rw-r--r--   3 htv210 supergroup 2509753777 2020-04-19 15:22 /tmp/bdm/nyc_parking_violation/2015.csv
+-rw-r--r--   3 htv210 supergroup 2066922537 2020-04-19 15:23 /tmp/bdm/nyc_parking_violation/2016.csv
+-rw-r--r--   3 htv210 supergroup 2086913576 2020-04-19 15:23 /tmp/bdm/nyc_parking_violation/2017.csv
+-rw-r--r--   3 htv210 supergroup 2174438972 2020-04-19 15:24 /tmp/bdm/nyc_parking_violation/2018.csv
+-rw-r--r--   3 htv210 supergroup 2003733456 2020-04-19 15:24 /tmp/bdm/nyc_parking_violation/2019.csv
+
+/tmp/bdm/nyc_cscl.csv
