@@ -8,17 +8,17 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 import statsmodels.api as sm
 import time
+import sys
+
 
 # TODO write to csv the output without the header
 # TODO write comments in the code and add description to functions
 # TODO change the variables names vastly
-# TODO try right outer join
 # TODO -- code is taking too long find ways to make this faster
-# TODO replace the regex in clean_violations (regex is slow)
-# TODO dont over cache(), like now
 # https://blog.clairvoyantsoft.com/improving-your-apache-spark-application-performance-e51e06339baa
 # must try this -> spark.conf.set("spark.sql.shuffle.partitions", 10)
 # https://www.bi4all.pt/en/news/en-blog/apache-spark-best-practices/
+# TODO change the boroughs to what we used in the file "TEST-BDM.ipynb"
 
 
 
@@ -43,7 +43,7 @@ def clean_violations(violations):
 
     violations.createOrReplaceTempView('violations')
     violations = spark.sql('SELECT * FROM violations WHERE Year >= 2015 AND Year <= 2019')
-    violations = violations.groupby('House Number','Street Name','Violation County','Year','House_Num1','House_Num2').count().cache()
+    violations = violations.groupby('House Number','Street Name','Violation County','Year','House_Num1','House_Num2').count()
     print("Done performing preprocessing for Violations, now moving to Centerline")
     
     return(violations)
@@ -68,7 +68,7 @@ def clean_centerline(centerline):
 
     split_col = F.split(centerline['R_HIGH_HN'], '-')
     centerline = centerline.withColumn('R_HIGH_HN_1', split_col.getItem(0).cast('int'))
-    centerline = centerline.withColumn('R_HIGH_HN_2', split_col.getItem(1).cast('int')).cache()
+    centerline = centerline.withColumn('R_HIGH_HN_2', split_col.getItem(1).cast('int'))
 
     print("Done performing preprocessing for Centerline, now moving to the conditional joins part")
     
@@ -82,7 +82,7 @@ def joins(violations, centerlne):
          violations['House_Num1'] <= centerline['R_HIGH_HN_1'],
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond1_violations = violations.join(centerline.hint("broadcast"), cond1, 'right').cache()
+    cond1_violations = violations.join(centerline.hint("broadcast"), cond1, 'rightouter').cache()
 
     cond2 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 1,
@@ -90,7 +90,7 @@ def joins(violations, centerlne):
          violations['House_Num1'] <= centerline['L_HIGH_HN_1'],
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond2_violations = violations.join(centerline.hint("broadcast"), cond2, 'right').cache()
+    cond2_violations = violations.join(centerline.hint("broadcast"), cond2, 'rightouter').cache()
 
     cond3 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 0,
@@ -100,7 +100,7 @@ def joins(violations, centerlne):
          violations['House_Num1'] <= centerline['R_HIGH_HN_1'],
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond3_violations = violations.join(centerline.hint("broadcast"), cond3, 'right').cache()
+    cond3_violations = violations.join(centerline.hint("broadcast"), cond3, 'rightouter').cache()
 
     cond4 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 1,
@@ -110,7 +110,7 @@ def joins(violations, centerlne):
          violations['House_Num1'] <= centerline['L_HIGH_HN_1'],
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'right').cache()
+    cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'rightouter').cache()
 
     print("conditional joins created, moving to the union")
 
@@ -153,6 +153,12 @@ def my_ols(a,b,c,d,e):
 if __name__=='__main__':
     sc = SparkContext().getOrCreate()
     spark = SparkSession(sc)
+
+    spark.conf.set("spark.sql.shuffle.partitions", 500)
+
+    output_file = sys.argv[1] 
+
+
     start = time.time()
     
     violations = spark.read.csv('hdfs:///tmp/bdm/nyc_parking_violation/', 
@@ -170,33 +176,36 @@ if __name__=='__main__':
                     multiLine=True).cache()
     centerline.createOrReplaceTempView('centerline')
     
-    violations = clean_violations(violations).cache()
+    violations = clean_violations(violations)
     # violations.show()
     
-    centerline = clean_centerline(centerline).cache()
+    centerline = clean_centerline(centerline)
     # centerline.show()
     
     cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations, centerline)
     
-    cond1_violations.createOrReplaceTempView('cond1_violations')
-    cond2_violations.createOrReplaceTempView('cond2_violations')
-    cond3_violations.createOrReplaceTempView('cond3_violations')
-    cond4_violations.createOrReplaceTempView('cond4_violations')
+    # cond1_violations.createOrReplaceTempView('cond1_violations')
+    # cond2_violations.createOrReplaceTempView('cond2_violations')
+    # cond3_violations.createOrReplaceTempView('cond3_violations')
+    # cond4_violations.createOrReplaceTempView('cond4_violations')
 
     result = unionAll(cond1_violations, cond2_violations, cond3_violations, cond4_violations).cache()
     # result.show()
     
-    result.createOrReplaceTempView('result')
+    # result.createOrReplaceTempView('result')
 
     x_pivot = pivot_result(result).cache()
     # x_pivot.show()
     
-    x_pivot.createOrReplaceTempView('x_pivot')
+    # x_pivot.createOrReplaceTempView('x_pivot')
     
-    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2015'],x_pivot['2016'],x_pivot['2017'],x_pivot['2018'],x_pivot['2019'])).cache()
+    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2015'],x_pivot['2016'],x_pivot['2017'],x_pivot['2018'],x_pivot['2019']))
 
     x_pivot = x_pivot.withColumn("OLS_COEFF", F.round("OLS_COEFF",3))
     
-    x_pivot.show()
+    # x_pivot.show()
+    
+    x_pivot.write.csv(output_file, mode = 'overwrite')
+
     end = time.time()
     print(end-start)
