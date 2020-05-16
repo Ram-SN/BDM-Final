@@ -1,6 +1,6 @@
 spark-submit --num-executors 5 --executor-cores 5 --executor-memory 15g \
  --conf spark.executorEnv.LD_LIBRARY_PATH=$LD_LIBRARY_PATH \
- final.py 
+ final_3.py
 
 module load spark/2.4.0 
 module load python/gnu/3.6.5 gcc/5.3.0
