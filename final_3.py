@@ -10,8 +10,7 @@ import statsmodels.api as sm
 import time
 import sys
 
-
-# TODO write to csv the output without the header
+# TODO with RDD
 # TODO write comments in the code and add description to functions
 # TODO change the variables names vastly
 # TODO -- code is taking too long find ways to make this faster
@@ -165,7 +164,7 @@ if __name__=='__main__':
                     header = True,
                     escape ='"',
                     inferSchema = True,
-                    multiLine=True).cache()
+                    multiLine=True)
     violations.createOrReplaceTempView('violations')
 
 
