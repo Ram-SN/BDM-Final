@@ -30,7 +30,7 @@ def clean_violations(violations):
     violations = violations.replace(boroughs, subset='Violation County')
 
     violations.createOrReplaceTempView('violations')
-    violations = spark.sql('SELECT * FROM violations WHERE Year >= 2011 AND Year <= 2015')
+    violations = spark.sql('SELECT * FROM violations WHERE Year >= 2015 AND Year <= 2019')
     violations = violations.groupby('House Number','Street Name','Violation County','Year','House_Num1','House_Num2').count()
     print("Done performing preprocessing for Violations, now moving to Centerline")
     
@@ -114,7 +114,7 @@ def pivot_result(result):
     
     result.createOrReplaceTempView('result')
     x_pivot = result.groupBy('PHYSICALID')\
-        .pivot("Year",["2011","2012","2013","2014","2015"])\
+        .pivot("Year",["2015","2016","2017","2018","2019"])\
         .count()\
         .orderBy(['PHYSICALID'], ascending=True)
 
@@ -127,7 +127,7 @@ def pivot_result(result):
 def my_ols(a,b,c,d,e):
     
     y = ([a,b,c,d,e])
-    x = ([2011,2012,2013,2014,2015])
+    x = ([2015,2016,2017,2018,2019])
     x = sm.add_constant(x)
     model = sm.OLS(y,x)
     results = model.fit()
@@ -142,7 +142,7 @@ if __name__=='__main__':
     spark = SparkSession(sc)
     start = time.time()
     
-    violations = spark.read.csv('hdfs:///tmp/bdm/nyc_parking_violation/2015.csv', 
+    violations = spark.read.csv('hdfs:///tmp/bdm/nyc_parking_violation/', 
                     header = True,
                     escape ='"',
                     inferSchema = True,
@@ -158,10 +158,10 @@ if __name__=='__main__':
     centerline.createOrReplaceTempView('centerline')
     
     violations = clean_violations(violations)
-    violations.show()
+    # violations.show()
     
     centerline = clean_centerline(centerline)
-    centerline.show()
+    # centerline.show()
     
     cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations, centerline)
     
@@ -170,18 +170,18 @@ if __name__=='__main__':
     cond3_violations.createOrReplaceTempView('cond3_violations')
     cond4_violations.createOrReplaceTempView('cond4_violations')
     result = unionAll(cond1_violations, cond2_violations, cond3_violations, cond4_violations)
-    result.show()
+    # result.show()
     
     result.createOrReplaceTempView('result')
     x_pivot = pivot_result(result)
-    x_pivot.show()
+    # x_pivot.show()
     
     x_pivot.createOrReplaceTempView('x_pivot')
     
-    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2011'],x_pivot['2012'],x_pivot['2013'],x_pivot['2014'],x_pivot['2015']))
+    x_pivot = x_pivot.withColumn("OLS_COEFF", my_ols(x_pivot['2015'],x_pivot['2016'],x_pivot['2017'],x_pivot['2018'],x_pivot['2019']))
 
     x_pivot = x_pivot.withColumn("OLS_COEFF", F.round("OLS_COEFF",2))
     
-    end = time.time()
     x_pivot.show()
+    end = time.time()
     print(end-start)
