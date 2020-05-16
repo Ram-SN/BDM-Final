@@ -154,7 +154,7 @@ if __name__=='__main__':
     sc = SparkContext().getOrCreate()
     spark = SparkSession(sc)
 
-    spark.conf.set("spark.sql.shuffle.partitions", 500)
+    spark.conf.set("spark.sql.shuffle.partitions", 1000)
 
     output_file = sys.argv[1] 
 
