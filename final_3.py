@@ -43,7 +43,7 @@ def clean_violations(violations):
 
     violations.createOrReplaceTempView('violations')
     violations = spark.sql('SELECT * FROM violations WHERE Year >= 2015 AND Year <= 2019')
-    violations = violations.groupby('House Number','Street Name','Violation County','Year','House_Num1','House_Num2').count()
+    # violations = violations.groupby('House Number','Street Name','Violation County','Year','House_Num1','House_Num2').count()
     print("Done performing preprocessing for Violations, now moving to Centerline")
     
     return(violations)
