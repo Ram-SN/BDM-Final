@@ -12,6 +12,14 @@ import time
 # TODO write to csv the output without the header
 # TODO write comments in the code and add description to functions
 # TODO change the variables names vastly
+# TODO try right outer join
+# TODO -- code is taking too long find ways to make this faster
+# TODO replace the regex in clean_violations (regex is slow)
+# TODO dont over cache(), like now
+# https://blog.clairvoyantsoft.com/improving-your-apache-spark-application-performance-e51e06339baa
+# must try this -> spark.conf.set("spark.sql.shuffle.partitions", 10)
+# https://www.bi4all.pt/en/news/en-blog/apache-spark-best-practices/
+
 
 
 def clean_violations(violations):
@@ -121,8 +129,9 @@ def pivot_result(result):
         .pivot("Year",["2015","2016","2017","2018","2019"])\
         .count()\
         .orderBy(['PHYSICALID'], ascending=True)\
-        .fillna(0)\
         .cache()
+
+    x_pivot = x_pivot.na.fill(0)
 
     print('Pivot table with years have been created, now creating the ols column for all rows')
 
