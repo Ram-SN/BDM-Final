@@ -141,7 +141,7 @@ if __name__=='__main__':
                     header = True,
                     escape ='"',
                     inferSchema = True,
-                    multiLine=True).cahe()
+                    multiLine=True).cache()
 
 
     centerline = spark.read.csv('hdfs:///tmp/bdm/nyc_cscl.csv', 
