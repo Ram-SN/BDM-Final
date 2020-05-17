@@ -16,14 +16,14 @@ import sys
 # TODO change the boroughs to what we used in the file "TEST-BDM.ipynb"
 
 def clean_violations(violations):
-'''
-PREPROCESSING:
-This function takes in the violations (all five files) as input. 
-In this function, we clean the violations table and drop the unwanted columns.
-We split house number into two to accomadate for compound house numbers
-We return: the violations file after pivoting on the years to reduce number of rows
-'''
-	
+    '''
+    PREPROCESSING:
+    This function takes in the violations (all five files) as input. 
+    In this function, we clean the violations table and drop the unwanted columns.
+    We split house number into two to accomadate for compound house numbers
+    We return: the violations file after pivoting on the years to reduce number of rows
+    '''
+
     violations = violations.na.drop(subset=['Street Name','House Number','Violation County','Issue Date'])
     violations = violations.select('House Number','Street Name','Violation County', 'Issue Date')
     violations = violations.withColumn('Street Name', F.upper(F.col('Street Name')))
@@ -51,13 +51,13 @@ We return: the violations file after pivoting on the years to reduce number of r
     return(violations_pivot)
 
 def clean_centerline(centerline):
-'''
-PREPROCESSING:
-This function takes in the centerline as the input.
-The role of this function is to clean the centerline file and split compound house numbers into two column (for each L and R combination)
-We replace rows that are same in FULL_STREE and ST_LABEL with '0' to avoid the OR operation during join
-We return: the centerline file after preprocessing
-'''
+    '''
+    PREPROCESSING:
+    This function takes in the centerline as the input.
+    The role of this function is to clean the centerline file and split compound house numbers into two column (for each L and R combination)
+    We replace rows that are same in FULL_STREE and ST_LABEL with '0' to avoid the OR operation during join
+    We return: the centerline file after preprocessing
+    '''
     
     centerline = centerline.select('PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE')
     centerline = centerline.na.drop(subset=['PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE'])
@@ -87,21 +87,21 @@ We return: the centerline file after preprocessing
 
 
 def joins(violations, centerline):
-'''
-This function takes in the pivoted violations and cleaned centerline as input
-In this function, we perform a total of 8 joins. 4 joins for each condition as mentioned in the problem statement.
-Times 2 to check for the FULL_STREE and ST_LABEL. This was done to avoid the OR statement.
-We return dataframes created by joins on:
+    '''
+    This function takes in the pivoted violations and cleaned centerline as input
+    In this function, we perform a total of 8 joins. 4 joins for each condition as mentioned in the problem statement.
+    Times 2 to check for the FULL_STREE and ST_LABEL. This was done to avoid the OR statement.
+    We return dataframes created by joins on:
 
-(1) CONDITION 1 (FULL_STREE)
-(2) CONDITION 1 (ST_LABEL)
-(3) CONDITION 2 (FULL_STREE)
-(4) CONDITION 2 (ST_LABEL)
-(5) CONDITION 3 (FULL_STREE)
-(6) CONDITION 3 (ST_LABEL)
-(7) CONDITION 4 (FULL_STREE)
-(8) CONDITION 4 (ST_LABEL)
-'''
+    (1) CONDITION 1 (FULL_STREE)
+    (2) CONDITION 1 (ST_LABEL)
+    (3) CONDITION 2 (FULL_STREE)
+    (4) CONDITION 2 (ST_LABEL)
+    (5) CONDITION 3 (FULL_STREE)
+    (6) CONDITION 3 (ST_LABEL)
+    (7) CONDITION 4 (FULL_STREE)
+    (8) CONDITION 4 (ST_LABEL)
+    '''
 
     cond1 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 0,
@@ -172,10 +172,10 @@ We return dataframes created by joins on:
 
 
 def unionAll(*dfs):
-'''
-This function takes in all the tables created from the "joins" function
-and returns the union all of the tables. Although UnionAll is deprecated in Spark 2.0.0+, it is still used.
-'''
+    '''
+    This function takes in all the tables created from the "joins" function
+    and returns the union all of the tables. Although UnionAll is deprecated in Spark 2.0.0+, it is still used.
+    '''
     
     print("Union done, we now have the final data set to use")
 
@@ -183,10 +183,10 @@ and returns the union all of the tables. Although UnionAll is deprecated in Spar
 
 
 def my_ols(a,b,c,d,e):
-'''
-This function takes in the five columns (2015,2016,2017,2018,2019). We use the columns from the pre_ols table.
-We return: the ols coefficient given every row.
-'''
+    '''
+    This function takes in the five columns (2015,2016,2017,2018,2019). We use the columns from the pre_ols table.
+    We return: the ols coefficient given every row.
+    '''
     y = ([a,b,c,d,e])
     x = ([2015,2016,2017,2018,2019])
     x = sm.add_constant(x)
