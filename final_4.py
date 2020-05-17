@@ -65,7 +65,7 @@ def clean_centerline(centerline):
     split_col = F.split(centerline['R_HIGH_HN'], '-')
     centerline = centerline.withColumn('R_HIGH_HN_1', split_col.getItem(0).cast('int'))
     centerline = centerline.withColumn('R_HIGH_HN_2', split_col.getItem(1).cast('int'))
-s
+
     print("Done performing preprocessing for Centerline, now moving to the conditional joins part")
 
     centerline = centerline.withColumn('ST_LABEL', F.when(centerline['FULL_STREE'] == centerline['ST_LABEL'], '0').otherwise(centerline['ST_LABEL']))
