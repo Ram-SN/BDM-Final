@@ -182,12 +182,12 @@ if __name__=='__main__':
 
     result_2.unpersist()
 
-    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['max(2015)'],output_pre_ols['max(2016)'],output_pre_ols['max(2017)'],output_pre_ols['max(2018)'],output_pre_ols['max(2019)']))\
+    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
     # output_ols.show()
-    output_ols = output_ols.select('PHYSICALID','max(2015)','max(2016)','max(2017)','max(2018)','max(2019)','OLS_COEFF')
+    output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF')
 
     output_ols.write.csv(output_file, mode = 'overwrite')
 
