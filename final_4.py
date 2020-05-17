@@ -256,7 +256,7 @@ if __name__=='__main__':
    
     output_pre_ols = result_2.groupBy('PHYSICALID').sum().cache()
 
-    output_pre_ols = output_pre_ols.sele('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)')
+    output_pre_ols = output_pre_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)')
 
     result_2.unpersist()
 
