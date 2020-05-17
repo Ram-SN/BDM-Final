@@ -272,7 +272,7 @@ if __name__=='__main__':
 
 
     # Selecting only the specific columns to make sure no unwanted column is present
-    output_ols = output_ols.select('PHYSICALID','2015','2016','2017','2018','2019','OLS_COEFF')
+    output_ols = output_ols.select('PHYSICALID','2015','2016','2017','2018','2019','OLS_COEFF').orderBy('PHYSICALID')
 
     # output_ols.show()
 
@@ -280,4 +280,4 @@ if __name__=='__main__':
 
     end = time.time()
     
-    print(start-end)
+    print(end-start)
