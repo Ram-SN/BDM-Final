@@ -254,7 +254,7 @@ if __name__=='__main__':
     # Here we fill in the values with 0 since these column contain NULL if there was no violations occurred
     result_2 = result.select('PHYSICALID','2015','2016','2017','2018','2019').na.fill(0).orderBy('PHYSICALID').cache()
    
-    output_pre_ols = result_2.groupBy('PHYSICALID').sum().cache()
+    output_pre_ols = result_2.cache()
 
     result_2.unpersist()
 
