@@ -67,6 +67,8 @@ def clean_centerline(centerline):
     centerline = centerline.withColumn('R_HIGH_HN_2', split_col.getItem(1).cast('int'))
 
     print("Done performing preprocessing for Centerline, now moving to the conditional joins part")
+
+    centerline = centerline.withColumn('ST_LABEL', F.when(centerline['FULL_STREE'] == centerline['ST_LABEL'], 0).otherwise(centerline['ST_LABEL']))
     
     return(centerline)
 
@@ -176,7 +178,7 @@ if __name__=='__main__':
 
     result_2 = result.select('PHYSICALID','2015','2016','2017','2018','2019').na.fill(0).orderBy('PHYSICALID').cache()
    
-    output_pre_ols = result_2.groupBy('PHYSICALID').max().cache()
+    output_pre_ols = result_2.groupBy('PHYSICALID').sum().cache()
 
     result_2.unpersist()
 
