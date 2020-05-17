@@ -63,7 +63,7 @@ def clean_centerline(centerline):
     print("Done performing preprocessing for Centerline, now moving to the conditional joins part")
     
     return(centerline)
-    
+
 
 def joins(violations, centerline):
 
@@ -128,7 +128,7 @@ def my_ols(a,b,c,d,e):
     return((results.params[1]))
 
 
- if __name__=='__main__':
+if __name__=='__main__':
     sc = SparkContext().getOrCreate()
     spark = SparkSession(sc)
 
