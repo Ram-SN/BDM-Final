@@ -10,6 +10,12 @@ import statsmodels.api as sm
 import time
 import sys
 
+# TODO values we get twice the intended (?) do we divide it by 2?
+# TODO write comments in the code and add description to functions
+# TODO change the variables names vastly
+# TODO -- code is taking too long find ways to make this faster
+# TODO change the boroughs to what we used in the file "TEST-BDM.ipynb"
+
 def clean_violations(violations):
     
     violations = violations.na.drop(subset=['Street Name','House Number','Violation County','Issue Date'])
@@ -32,7 +38,7 @@ def clean_violations(violations):
     violations.createOrReplaceTempView('violations')
     violations = spark.sql('SELECT * FROM violations WHERE Year >= 2015 AND Year <= 2019')
 
-    violations_pivot = violations.groupby('House Number','Street Name','Violation County','House_Num1','House_Num2').pivot('Year',["2015","2016","2017","2018","2019"]).count().cache()
+    violations_pivot = violations.groupby('Violation County','Street Name','House Number','House_Num1','House_Num2').pivot('Year',["2015","2016","2017","2018","2019"]).count().cache()
     
     print("Done performing preprocessing for Violations, now moving to Centerline")
     
@@ -66,7 +72,7 @@ def clean_centerline(centerline):
 
 
 def joins(violations, centerline):
-
+#  TODO first county, street, house number
     cond1 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 0,
          violations['House_Num1'] >= centerline['R_LOW_HN_1'],
@@ -175,8 +181,8 @@ if __name__=='__main__':
     cond4_violations.unpersist()
 
     result_2 = result.select('PHYSICALID','2015','2016','2017','2018','2019').na.fill(0).orderBy('PHYSICALID').cache()
-
-    output_pre_ols = result_2.groupBy('PHYSICALID').sum().cache()
+   
+    output_pre_ols = result_2.groupBy('PHYSICALID').max().cache()
 
     result_2.unpersist()
 
@@ -185,7 +191,6 @@ if __name__=='__main__':
 
 
     # output_ols.show()
-# TODO select only the columns we need
     output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF')
 
     output_ols.write.csv(output_file, mode = 'overwrite')
