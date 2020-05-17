@@ -46,7 +46,7 @@ def clean_violations(violations):
 
 def clean_centerline(centerline):
     
-    centerline = centerline.select('PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE').distinct()
+    centerline = centerline.select('PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE')
     centerline = centerline.na.drop(subset=['PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE'])
     centerline = centerline.withColumn('FULL_STREE', F.upper(F.col('FULL_STREE'))).withColumn('ST_LABEL', F.upper(F.col('ST_LABEL')))
 
@@ -65,10 +65,10 @@ def clean_centerline(centerline):
     split_col = F.split(centerline['R_HIGH_HN'], '-')
     centerline = centerline.withColumn('R_HIGH_HN_1', split_col.getItem(0).cast('int'))
     centerline = centerline.withColumn('R_HIGH_HN_2', split_col.getItem(1).cast('int'))
-
+s
     print("Done performing preprocessing for Centerline, now moving to the conditional joins part")
 
-    centerline = centerline.withColumn('ST_LABEL', F.when(centerline['FULL_STREE'] == centerline['ST_LABEL'], 0).otherwise(centerline['ST_LABEL']))
+    centerline = centerline.withColumn('ST_LABEL', F.when(centerline['FULL_STREE'] == centerline['ST_LABEL'], '0').otherwise(centerline['ST_LABEL']))
     
     return(centerline)
 
@@ -79,35 +79,65 @@ def joins(violations, centerline):
          violations['House_Num1'] % 2 == 0,
          ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
-         ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond1_violations = violations.join(centerline.hint("broadcast"), cond1, 'rightouter').cache()
+         ((violations['Street Name'] == centerline['FULL_STREE']))]
+    cond1_violations = violations.join(centerline.hint("broadcast"), cond1, 'right').cache()
+
+    cond1_1 = [violations['House_Num2'].isNull(),
+         violations['House_Num1'] % 2 == 0,
+         ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
+         violations['Violation County'] == centerline['BOROCODE'],
+         (violations['Street Name'] == centerline['ST_LABEL'])]
+    cond1_1_violations = violations.join(centerline.hint("broadcast"), cond1_1, 'right').cache()
 
     cond2 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 1,
          ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
-         ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond2_violations = violations.join(centerline.hint("broadcast"), cond2, 'rightouter').cache()
+         ((violations['Street Name'] == centerline['FULL_STREE']))]
+    cond2_violations = violations.join(centerline.hint("broadcast"), cond2, 'right').cache()
+
+    cond2_2 = [violations['House_Num2'].isNull(),
+         violations['House_Num1'] % 2 == 1,
+         ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
+         violations['Violation County'] == centerline['BOROCODE'],
+         (violations['Street Name'] == centerline['ST_LABEL'])]
+    cond2_2_violations = violations.join(centerline.hint("broadcast"), cond2_2, 'right').cache()
 
     cond3 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 0,
          ((violations['House_Num2'] >= centerline['R_LOW_HN_2']) & (violations['House_Num2'] <= centerline['R_HIGH_HN_2'])),
          ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
-         ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond3_violations = violations.join(centerline.hint("broadcast"), cond3, 'rightouter').cache()
+         ((violations['Street Name'] == centerline['FULL_STREE']))]
+    cond3_violations = violations.join(centerline.hint("broadcast"), cond3, 'right').cache()
+
+    cond3_3 = [violations['House_Num2'].isNotNull(),
+         violations['House_Num2'] % 2 == 0,
+         ((violations['House_Num2'] >= centerline['R_LOW_HN_2']) & (violations['House_Num2'] <= centerline['R_HIGH_HN_2'])),
+         ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
+         violations['Violation County'] == centerline['BOROCODE'],
+         (violations['Street Name'] == centerline['ST_LABEL'])]
+    cond3_3_violations = violations.join(centerline.hint("broadcast"), cond3_3, 'right').cache()
 
     cond4 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 1,
          ((violations['House_Num2'] >= centerline['L_LOW_HN_2']) & (violations['House_Num2'] <= centerline['L_HIGH_HN_2'])),
          ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
-         ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
-    cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'rightouter').cache()
+         ((violations['Street Name'] == centerline['FULL_STREE']))] 
+    cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'right').cache()
+
+    cond4_4 = [violations['House_Num2'].isNotNull(),
+         violations['House_Num2'] % 2 == 1,
+         ((violations['House_Num2'] >= centerline['L_LOW_HN_2']) & (violations['House_Num2'] <= centerline['L_HIGH_HN_2'])),
+         ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
+         violations['Violation County'] == centerline['BOROCODE'],
+         (violations['Street Name'] == centerline['ST_LABEL'])]
+    cond4_4_violations = violations.join(centerline.hint("broadcast"), cond4_4, 'right').cache()
 
     print("conditional joins created, moving to the union")
 
-    return(cond1_violations,cond2_violations,cond3_violations,cond4_violations)
+    return(cond1_violations,cond1_1_violations,cond2_violations,cond2_2_violations,cond3_violations,cond3_3_violations,cond4_violations,cond4_4_violations)
 
     print("conditional joins created, moving to the union")
 
@@ -163,13 +193,13 @@ if __name__=='__main__':
     
     centerline = clean_centerline(centerline)
 
-    cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations_pivot, centerline)
+    cond1_violations,cond1_1_violations,cond2_violations,cond2_2_violations,cond3_violations,cond3_3_violations,cond4_violations,cond4_4_violations = joins(violations_pivot, centerline)
 
     violations_pivot.unpersist()
 
     centerline.unpersist()
 
-    result = unionAll(cond1_violations, cond2_violations, cond3_violations, cond4_violations).cache()
+    result = unionAll(cond1_violations,cond1_1_violations,cond2_violations,cond2_2_violations,cond3_violations,cond3_3_violations,cond4_violations,cond4_4_violations).cache()
 
     cond1_violations.unpersist()
     cond2_violations.unpersist()
