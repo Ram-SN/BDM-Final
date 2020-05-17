@@ -267,7 +267,7 @@ if __name__=='__main__':
                 .agg(F.max('sum(2015)').alias('2015'),F.max('sum(2016)').alias('2016'), F.max('sum(2017)').alias('2017'), F.max('sum(2018)').alias('2018'), F.max('sum(2019)').alias('2019')).cache()
 
     # Here, we pass each of the year row as a value to the function to "my_ols", and create a new column "OLS_COEFF" with the output of it
-    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
+    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['2015'],output_pre_ols['2016'],output_pre_ols['2017'],output_pre_ols['2018'],output_pre_ols['2019']))\
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
