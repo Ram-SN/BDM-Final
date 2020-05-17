@@ -75,36 +75,30 @@ def joins(violations, centerline):
 #  TODO first county, street, house number
     cond1 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 0,
-         violations['House_Num1'] >= centerline['R_LOW_HN_1'],
-         violations['House_Num1'] <= centerline['R_HIGH_HN_1'],
+         ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
     cond1_violations = violations.join(centerline.hint("broadcast"), cond1, 'rightouter').cache()
 
     cond2 = [violations['House_Num2'].isNull(),
          violations['House_Num1'] % 2 == 1,
-         violations['House_Num1'] >= centerline['L_LOW_HN_1'],
-         violations['House_Num1'] <= centerline['L_HIGH_HN_1'],
+         ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
     cond2_violations = violations.join(centerline.hint("broadcast"), cond2, 'rightouter').cache()
 
     cond3 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 0,
-         violations['House_Num2'] >= centerline['R_LOW_HN_2'],
-         violations['House_Num2'] <= centerline['R_HIGH_HN_2'],
-         violations['House_Num1'] >= centerline['R_LOW_HN_1'],
-         violations['House_Num1'] <= centerline['R_HIGH_HN_1'],
+         ((violations['House_Num2'] >= centerline['R_LOW_HN_2']) & (violations['House_Num2'] <= centerline['R_HIGH_HN_2'])),
+         ((violations['House_Num1'] >= centerline['R_LOW_HN_1']) & (violations['House_Num1'] <= centerline['R_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
     cond3_violations = violations.join(centerline.hint("broadcast"), cond3, 'rightouter').cache()
 
     cond4 = [violations['House_Num2'].isNotNull(),
          violations['House_Num2'] % 2 == 1,
-         violations['House_Num2'] >= centerline['L_LOW_HN_2'],
-         violations['House_Num2'] <= centerline['L_HIGH_HN_2'],
-         violations['House_Num1'] >= centerline['L_LOW_HN_1'],
-         violations['House_Num1'] <= centerline['L_HIGH_HN_1'],
+         ((violations['House_Num2'] >= centerline['L_LOW_HN_2']) & (violations['House_Num2'] <= centerline['L_HIGH_HN_2'])),
+         ((violations['House_Num1'] >= centerline['L_LOW_HN_1']) & (violations['House_Num1'] <= centerline['L_HIGH_HN_1'])),
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
     cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'rightouter').cache()
@@ -186,12 +180,12 @@ if __name__=='__main__':
 
     result_2.unpersist()
 
-    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
+    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['max(2015)'],output_pre_ols['max(2016)'],output_pre_ols['max(2017)'],output_pre_ols['max(2018)'],output_pre_ols['max(2019)']))\
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
     # output_ols.show()
-    output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF')
+    output_ols = output_ols.select('PHYSICALID','max(2015)','max(2016)','max(2017)','max(2018)','max(2019)','OLS_COEFF')
 
     output_ols.write.csv(output_file, mode = 'overwrite')
 
