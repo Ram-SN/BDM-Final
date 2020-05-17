@@ -261,7 +261,7 @@ if __name__=='__main__':
     # Here we perform a union with the distinct centerline dataframe and pre_ols dataframe to fill in the missing Physical IDs
     # The resulting dataframe is grouped on "PHYSICALID" and aggregated to get the max of the values.
     output_pre_ols = output_pre_ols.union(centerline_distinct)\
-                .groupBy("PHYSICALID")
+                .groupBy("PHYSICALID")\
                 .agg(F.max('sum(2015)').alias('2015'),F.max('sum(2016)').alias('2016'), F.max('sum(2017)').alias('2017'), F.max('sum(2018)').alias('2018'), F.max('sum(2019)').alias('2019')).cache()
 
     # Here, we pass each of the year row as a value to the function to "my_ols", and create a new column "OLS_COEFF" with the output of it
