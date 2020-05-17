@@ -132,8 +132,9 @@ if __name__=='__main__':
     sc = SparkContext().getOrCreate()
     spark = SparkSession(sc)
 
-    # output_file = sys.argv[1] 
+    spark.catalog.clearCache()
 
+    # output_file = sys.argv[1] 
 
     start = time.time()
     
@@ -150,20 +151,33 @@ if __name__=='__main__':
                     inferSchema = True,
                     multiLine=True).cache()
     
-    violations = clean_violations(violations)
+    violations_pivot = clean_violations(violations).cache()
+
+    violations.unpersist()
     
     centerline = clean_centerline(centerline)
 
-    cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations, centerline)
+    cond1_violations,cond2_violations,cond3_violations,cond4_violations = joins(violations_pivot, centerline)
+
+    violations_pivot.unpersist()
+
+    centerline.unpersist()
 
     result = unionAll(cond1_violations, cond2_violations, cond3_violations, cond4_violations).cache()
 
-    result_2 = result.select('PHYSICALID','2015','2016','2017','2018','2019').na.fill(0).orderBy('PHYSICALID')
+    cond1_violations.unpersist()
+    cond2_violations.unpersist()
+    cond3_violations.unpersist()
+    cond4_violations.unpersist()
 
-    output_pre_ols = result_2.groupBy('PHYSICALID').sum()
+    result_2 = result.select('PHYSICALID','2015','2016','2017','2018','2019').na.fill(0).orderBy('PHYSICALID').cache()
+
+    output_pre_ols = result_2.groupBy('PHYSICALID').sum().cache()
+
+    result_2.unpersist()
 
     output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
-                               .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3))
+                               .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
     output_ols.show()
