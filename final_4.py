@@ -132,7 +132,7 @@ if __name__=='__main__':
     sc = SparkContext().getOrCreate()
     spark = SparkSession(sc)
 
-    output_file = sys.argv[1] 
+    # output_file = sys.argv[1] 
 
 
     start = time.time()
