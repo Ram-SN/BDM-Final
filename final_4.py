@@ -40,7 +40,7 @@ def clean_violations(violations):
 
 def clean_centerline(centerline):
     
-    centerline = centerline.select('PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE')
+    centerline = centerline.select('PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE').distinct()
     centerline = centerline.na.drop(subset=['PHYSICALID','L_LOW_HN','L_HIGH_HN', 'R_LOW_HN','R_HIGH_HN','FULL_STREE','ST_LABEL','BOROCODE'])
     centerline = centerline.withColumn('FULL_STREE', F.upper(F.col('FULL_STREE'))).withColumn('ST_LABEL', F.upper(F.col('ST_LABEL')))
 
@@ -102,6 +102,10 @@ def joins(violations, centerline):
          violations['Violation County'] == centerline['BOROCODE'],
          ((violations['Street Name'] == centerline['FULL_STREE']) | (violations['Street Name'] == centerline['ST_LABEL']))]
     cond4_violations = violations.join(centerline.hint("broadcast"), cond4, 'rightouter').cache()
+
+    print("conditional joins created, moving to the union")
+
+    return(cond1_violations,cond2_violations,cond3_violations,cond4_violations)
 
     print("conditional joins created, moving to the union")
 
@@ -181,6 +185,8 @@ if __name__=='__main__':
 
 
     # output_ols.show()
+# TODO select only the columns we need
+    output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF')
 
     output_ols.write.csv(output_file, mode = 'overwrite')
 
