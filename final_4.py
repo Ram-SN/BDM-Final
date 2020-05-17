@@ -134,7 +134,7 @@ if __name__=='__main__':
 
     spark.catalog.clearCache()
 
-    # output_file = sys.argv[1] 
+    output_file = sys.argv[1] 
 
     start = time.time()
     
@@ -180,7 +180,10 @@ if __name__=='__main__':
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
-    output_ols.show()
+    # output_ols.show()
+
+    output_ols.write.csv(output_file, mode = 'overwrite')
+
 
     end = time.time()
     print(end-start)
