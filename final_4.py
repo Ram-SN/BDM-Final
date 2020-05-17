@@ -186,6 +186,13 @@ if __name__=='__main__':
                     escape ='"',
                     inferSchema = True,
                     multiLine=True).cache()
+
+    centerline_distinct = centerline.select("PHYSICALID").distinct()\
+                          .withColumn('2015',F.lit(0))\
+                          .withColumn('2016',F.lit(0))\
+                          .withColumn('2017',F.lit(0))\
+                          .withColumn('2018',F.lit(0))\
+                          .withColumn('2019',F.lit(0)).cache()
     
     violations_pivot = clean_violations(violations).cache()
 
@@ -212,13 +219,22 @@ if __name__=='__main__':
 
     result_2.unpersist()
 
+    temp_result = output_pre_ols.union(centerline_distinct)\
+                .groupBy("PHYSICALID")
+                .agg(F.max('sum(2015)').alias('2015'),F.max('sum(2016)').alias('2016'), F.max('sum(2017)').alias('2017'), F.max('sum(2018)').alias('2018'), F.max('sum(2019)').alias('2019')).cache()
+
     output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 3)).cache()
 
 
-    # output_ols.show()
-    output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF')
 
+    output_ols = output_ols.select('PHYSICALID','2015','2016','2017','2018','2019','OLS_COEFF')
+
+    output_ols = output_ols.withColumn('2015', F.floor(F.col('2015')/2)).withColumn('2016', F.floor(F.col('2016')/2)).withColumn('2017',F.floor(F.col('2017')/2)).withColumn('2018', F.floor(F.col('2018')/2)).withColumn('2019', F.floor(F.col('2019')/2))
+
+
+    output_ols.show()
+    
     output_ols.write.csv(output_file, mode = 'overwrite')
 
 
