@@ -23,7 +23,7 @@ def clean_violations(violations):
 	We split house number into two to accomadate for compound house numbers
 	We return: the violations file after pivoting on the years to reduce number of rows
 	'''
-    
+	
     violations = violations.na.drop(subset=['Street Name','House Number','Violation County','Issue Date'])
     violations = violations.select('House Number','Street Name','Violation County', 'Issue Date')
     violations = violations.withColumn('Street Name', F.upper(F.col('Street Name')))
