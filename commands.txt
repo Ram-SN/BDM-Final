@@ -1,6 +1,6 @@
 spark-submit --num-executors 5 --executor-cores 5 --executor-memory 15g \
  --conf spark.executorEnv.LD_LIBRARY_PATH=$LD_LIBRARY_PATH \
- final_3.py BDM_final_output_1000_part_change
+ final_4.py BDM_v1
 
 module load spark/2.4.0 
 module load python/gnu/3.6.5 gcc/5.3.0
@@ -15,4 +15,15 @@ export PYSPARK_PYTHON=`which python`
 
 /tmp/bdm/nyc_cscl.csv
 
+unset SSH_ASKPASS
+
+hadoop fs -getmerge BDM_final_output_1000_part_change BDM_output_3.csv
+
 6493.23407292366 - 500 part
+
+7498 - 1000 part
+
+
+do the groupby, 
+
+pivot on the violations after the groupby with columns as years and the values as their 
