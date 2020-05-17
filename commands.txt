@@ -1,6 +1,6 @@
 spark-submit --num-executors 5 --executor-cores 5 --executor-memory 15g \
  --conf spark.executorEnv.LD_LIBRARY_PATH=$LD_LIBRARY_PATH \
- final_4.py BDM_v1
+ final_4.py final_op
 
 module load spark/2.4.0 
 module load python/gnu/3.6.5 gcc/5.3.0
@@ -53,3 +53,6 @@ pivot on the violations after the groupby with columns as years and the values a
 |        60|           1920|      162|      114|      100|       94|       37|    -27.0|
 |        61|            915|        3|        0|        3|        0|        0|     -0.6|
 +----------+---------------+---------+---------+---------+---------+---------+---------+
+
+
+461.18543219566345
