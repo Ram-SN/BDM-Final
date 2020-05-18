@@ -268,12 +268,12 @@ if __name__=='__main__':
                 .agg(F.max('sum(2015)'),F.max('sum(2016)'), F.max('sum(2017)'), F.max('sum(2018)'), F.max('sum(2019)')).cache()
 
     # Here, we pass each of the year row as a value to the function to "my_ols", and create a new column "OLS_COEFF" with the output of it
-    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['sum(2015)'],output_pre_ols['sum(2016)'],output_pre_ols['sum(2017)'],output_pre_ols['sum(2018)'],output_pre_ols['sum(2019)']))\
+    output_ols = output_pre_ols.withColumn("OLS_COEFF", my_ols(output_pre_ols['max(sum(2015))'],output_pre_ols['max(sum(2016))'],output_pre_ols['max(sum(2017))'],output_pre_ols['max(sum(2018))'],output_pre_ols['max(sum(2019))']))\
                                .withColumn("OLS_COEFF", F.round("OLS_COEFF", 7)).cache()
 
 
     # Selecting only the specific columns to make sure no unwanted column is present
-    output_ols = output_ols.select('PHYSICALID','sum(2015)','sum(2016)','sum(2017)','sum(2018)','sum(2019)','OLS_COEFF').orderBy('PHYSICALID')
+    output_ols = output_ols.select('PHYSICALID','max(sum(2015))','max(sum(2016))','max(sum(2017))','max(sum(2018))','max(sum(2019))','OLS_COEFF').orderBy('PHYSICALID')
 
     # output_ols.show()
 
