@@ -193,7 +193,7 @@ def my_ols(a,b,c,d,e):
     y = ([a,b,c,d,e])
    
     res_ols = sm.OLS(y,x)
-    output = model.fit()
+    output = res_ols.fit()
     
     print("Final Output")
 
